@@ -62,15 +62,11 @@ repo: git.Repository & {
 	url: "https://github.com/nizox/test-containers"
 }
 
-images: [
-	{
-		context: repo.out
-		dockerfile: strings.Join(["### \( fragment.name ) ###\n" + fragment.template for fragment in image.fragments], "\n\n")
+images: {
+	for image in combinations {
+		"\( image.fragments[0].runtime_version )": bl.Build & {
+			context: repo.out
+			dockerfile: strings.Join(["### \( fragment.name ) ###\n" + fragment.template for fragment in image.fragments], "\n\n")
+		}
 	}
-	for image in combinations
-]
-
-test: bl.Build & {
-	context: repo.out
-	dockerfile: strings.Join([fragment.template for fragment in combinations[0].fragments], "\n\n")
 }
