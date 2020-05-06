@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"b.l/bl"
+	"stackbrew.io/git"
 )
 
 Fragment :: {
@@ -57,17 +58,19 @@ combinations: [
 	for python in python_versions
 ]
 
+repo: git.Repository & {
+	url: "https://github.com/nizox/test-containers"
+}
+
 images: [
 	{
-		context: local: "."
+		context: repo.out
 		dockerfile: strings.Join(["### \( fragment.name ) ###\n" + fragment.template for fragment in image.fragments], "\n\n")
 	}
 	for image in combinations
 ]
 
-//test_image: bl.Build & {
-//	context: local: "."
-//	dockerfile: strings.Join([fragment.template for fragment in combinations[0].fragments], "\n\n")
-//}
-
-test: bl.Build & images[0]
+test: bl.Build & {
+	context: repo.out
+	dockerfile: strings.Join([fragment.template for fragment in combinations[0].fragments], "\n\n")
+}
