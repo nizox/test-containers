@@ -16,14 +16,13 @@ TestAppGrid :: {
 	// A directory with multiple sources, each in a sub-directory
 	sources : [name=string]: bl.Directory
 
-	apps: {
-		for sourceName, sourceDir in sources {
-			for pythonVersion, _ in pythonVersions {
-				"\(sourceName)": "\(pythonVersion)": TestApp & {
-					"pythonVersion": pythonVersion
-					source: sourceDir
-					description: "\(sourceName) on python \(pythonVersion)"
-				}
+	apps: [name=string]: [version=string]: TestApp
+	for sourceName, sourceDir in sources {
+		for pythonVersion, _ in pythonVersions {
+			apps: "\(sourceName)": "\(pythonVersion)": TestApp & {
+				"pythonVersion": pythonVersion
+				source: sourceDir
+				description: "\(sourceName) on python \(pythonVersion)"
 			}
 		}
 	}
