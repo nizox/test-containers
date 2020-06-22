@@ -53,3 +53,14 @@ grid : #TestAppGrid & {
 		flask: true
 	}
 }
+
+ls: bl.BashScript & {
+	input: "/flask": bl.Directory & {
+		source: env.assets
+		path: "flask"
+	}
+	output: "/result": string
+	code: """
+	ls -l /flask > /result
+	"""
+}
