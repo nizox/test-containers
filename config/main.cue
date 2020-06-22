@@ -1,35 +1,47 @@
 package main
 
 import (
-	"blocklayer.dev/bl"
+	"stackbrew.io/git"
 )
 
-TestApp :: PythonApp & {
-	pythonVersion: string
-	env: PYTHON_BIN: "python\(pythonVersion)"
-	app: script: "run.sh"
+env: {
+	testRepository: git.Repository & {
+		url: "https://github.com/nizox/test-containers"
+	}
 }
 
 
-TestAppGrid :: {
-	pythonVersions : [version=string]: true
-	// A directory with multiple sources, each in a sub-directory
-	sources : [name=string]: bl.Directory
+#TestApp: {
+	frameworkName: string
 
-	apps: [name=string]: [version=string]: TestApp
-	for sourceName, sourceDir in sources {
+	#PythonApp & {
+		source: {
+			dir: env.testRepository.output
+			subdir: "assets/\(frameworkName)"
+		}
+	}
+}
+
+
+#TestAppGrid: {
+	pythonVersions : [version=string]: true
+
+	frameworkNames : [name=string]: true
+
+	apps: [name=string]: [version=string]: #TestApp
+	for frameworkName, _ in frameworkNames {
 		for pythonVersion, _ in pythonVersions {
-			apps: "\(sourceName)": "\(pythonVersion)": TestApp & {
+			apps: "\(frameworkName)": "\(pythonVersion)": #TestApp & {
+				"frameworkName": frameworkName
 				"pythonVersion": pythonVersion
-				source: sourceDir
-				description: "\(sourceName) on python \(pythonVersion)"
+				description: "\(frameworkName) on python \(pythonVersion)"
 			}
 		}
 	}
 }
 
 // Full test grid
-grid : TestAppGrid & {
+grid : #TestAppGrid & {
 	pythonVersions : {
 		"2.7": true
 		"3.5": true
@@ -37,14 +49,7 @@ grid : TestAppGrid & {
 		"3.7": true
 		"3.8": true
 	}
-	sources : {
-		for name, dir in src {
-			"\(name)": dir
-		}
+	frameworkNames : {
+		flask: true
 	}
-}
-
-// App sources. Manually push (for now)
-src: {
-	flask: bl.Directory
 }

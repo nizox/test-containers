@@ -5,16 +5,17 @@ import (
 	"blocklayer.dev/bl"
 )
 
-PythonApp :: {
+#PythonApp: {
 	description?: string
 
-	pythonVersion: string
+	pythonVersion: string | *"3.8"
 	baseImage: {
 		name: "python"
 		tag: pythonVersion
 	}
 	env: {
 		[string]: string
+		PYTHON_BIN: "python\(pythonVersion)"
 	}
 
 	app: {
@@ -24,34 +25,29 @@ PythonApp :: {
 
 	port: int | *8080
 
-	source: bl.Directory
+	source: {
+		dir: bl.Directory
+		subdir: string | *"/"
+	}
 
-	Dockerfile ::
+	#Dockerfile:
 		"""
 		FROM \(baseImage.name):\(baseImage.tag)
 		\(strings.Join(["ENV \(k)=\(v)" for k, v in env], "\n"))
 
-		RUN mkdir \(app.dir)
+		RUN mkdir -p \(app.dir)
 		WORKDIR \(app.dir)
-		COPY /requirements.txt \(app.dir)/requirements.txt
+		COPY \(source.subdir)/requirements.txt \(app.dir)/requirements.txt
 		RUN pip install --no-cache-dir -r requirements.txt
-		ADD / \(app.dir)/
+		ADD \(source.subdir) \(app.dir)/
 
 		ENV PORT=\(port)
 		EXPOSE \(port)
 		ENTRYPOINT ["\(app.dir)/\(app.script)"]
 		"""
 
-	Build :: bl.Build & {
-		context: source
-		dockerfile: Dockerfile
+	bl.Build & {
+		context: source.dir
+		dockerfile: #Dockerfile
 	}
-	// FIXME: skip the intermediary "build" field (not yet supported by Blocklayer engine)
-	// build: Build
-	build: bl.Build & {
-		context: source
-		dockerfile: Dockerfile
-	}
-
-	// image: build.image
 }
