@@ -2,13 +2,12 @@ package main
 
 import (
 	"blocklayer.dev/bl"
-	"stackbrew.io/git"
 )
 
 env: {
-	testRepository: git.Repository & {
-		url: "https://github.com/nizox/test-containers"
-	}
+	// App assets. Manually push (for now) using the following command:
+	// bl push <DOMAIN> -t env.assets assets/
+	assets: bl.Directory
 }
 
 
@@ -17,8 +16,8 @@ env: {
 
 	#PythonApp & {
 		source: bl.Directory & {
-			source: env.testRepository.out
-			path: "assets/\(frameworkName)"
+			source: env.assets
+			path: frameworkName
 		}
 	}
 }
