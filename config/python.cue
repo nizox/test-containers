@@ -25,10 +25,7 @@ import (
 
 	port: int | *8080
 
-	source: {
-		dir: bl.Directory
-		subdir: string | *"/"
-	}
+	source: bl.Directory
 
 	#Dockerfile:
 		"""
@@ -37,9 +34,9 @@ import (
 
 		RUN mkdir -p \(app.dir)
 		WORKDIR \(app.dir)
-		COPY \(source.subdir)/requirements.txt \(app.dir)/requirements.txt
+		COPY /requirements.txt \(app.dir)/requirements.txt
 		RUN pip install --no-cache-dir -r requirements.txt
-		ADD \(source.subdir) \(app.dir)/
+		ADD / \(app.dir)/
 
 		ENV PORT=\(port)
 		EXPOSE \(port)
@@ -47,7 +44,7 @@ import (
 		"""
 
 	bl.Build & {
-		context: source.dir
+		context: source
 		dockerfile: #Dockerfile
 	}
 }

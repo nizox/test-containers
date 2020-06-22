@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blocklayer.dev/bl"
 	"stackbrew.io/git"
 )
 
@@ -15,9 +16,9 @@ env: {
 	frameworkName: string
 
 	#PythonApp & {
-		source: {
-			dir: env.testRepository.output
-			subdir: "assets/\(frameworkName)"
+		source: bl.Directory & {
+			source: env.testRepository.out
+			path: "assets/\(frameworkName)"
 		}
 	}
 }
