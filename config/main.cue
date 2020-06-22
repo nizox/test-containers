@@ -10,29 +10,19 @@ env: {
 	assets: bl.Directory
 }
 
-
-#TestApp: {
-	frameworkName: string
-
-	#PythonApp & {
-		source: bl.Directory & {
-			source: env.assets
-			path: frameworkName
-		}
-	}
-}
-
-
 #TestAppGrid: {
-	pythonVersions : [version=string]: true
+	pythonVersions : [string]: true
 
-	frameworkNames : [name=string]: true
+	frameworkNames : [string]: true
 
-	apps: [name=string]: [version=string]: #TestApp
+	apps: [string]: [string]: #PythonApp
 	for frameworkName, _ in frameworkNames {
 		for pythonVersion, _ in pythonVersions {
-			apps: "\(frameworkName)": "\(pythonVersion)": #TestApp & {
-				"frameworkName": frameworkName
+			apps: "\(frameworkName)": "\(pythonVersion)": #PythonApp & {
+				source: bl.Directory & {
+					"source": env.assets
+					path: frameworkName
+				}
 				"pythonVersion": pythonVersion
 				description: "\(frameworkName) on python \(pythonVersion)"
 			}
