@@ -33,9 +33,9 @@ import (
 		\(strings.Join(["ENV \(k)=\(v)" for k, v in env], "\n"))
 
 		RUN mkdir -p \(app.dir)
-		COPY /flask/requirements.txt \(app.dir)/requirements.txt
+		COPY /requirements.txt \(app.dir)/requirements.txt
 		RUN pip install --no-cache-dir -r \(app.dir)/requirements.txt
-		ADD /flask/ \(app.dir)/
+		ADD / \(app.dir)/
 
 		ENV PORT=\(port)
 		EXPOSE \(port)
