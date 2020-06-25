@@ -15,16 +15,39 @@ env: {
 
 	frameworkNames : [string]: true
 
-	apps: [string]: [string]: #PythonApp
+	webServerNames: [string]: true
+
+	apps: [string]: [string]: [string]: #PythonApp
 	for frameworkName, _ in frameworkNames {
 		for pythonVersion, _ in pythonVersions {
-			apps: "\(frameworkName)": "\(pythonVersion)": #PythonApp & {
-				source: bl.Directory & {
-					"source": env.assets
-					path: frameworkName
+			if webServerNames == _|_ {
+				apps: "\(frameworkName)": "\(pythonVersion)": "dev": #PythonApp & {
+					app: {
+						source: frameworkName
+					}
+					source: env.assets
+					"pythonVersion": pythonVersion
+					description: "\(frameworkName) dev on python \(pythonVersion)"
 				}
-				"pythonVersion": pythonVersion
-				description: "\(frameworkName) on python \(pythonVersion)"
+			}
+			if webServerNames != _|_ {
+				for webServerName, _ in webServerNames {
+					apps: "\(frameworkName)": "\(pythonVersion)": "\(webServerName)": #PythonApp & {
+						app: {
+							source: frameworkName
+							script: "\(app.dir)/\(webServerName).sh"
+						}
+						overrideDockerfile: """
+						COPY /\(webServerName).sh \(app.dir)
+						"""
+						extraPackages: {
+							"\(webServerName)": true
+						}
+						source: env.assets
+						"pythonVersion": pythonVersion
+						description: "\(frameworkName) with \(webServerName) on python \(pythonVersion)"
+					}
+				}
 			}
 		}
 	}
@@ -42,15 +65,7 @@ grid : #TestAppGrid & {
 	frameworkNames : {
 		flask: true
 	}
-}
-
-ls: bl.BashScript & {
-	input: "/flask": bl.Directory & {
-		source: env.assets
-		path: "flask"
+	webServerNames: {
+		gunicorn: true
 	}
-	output: "/result": string
-	code: """
-	ls -l /flask > /result
-	"""
 }
